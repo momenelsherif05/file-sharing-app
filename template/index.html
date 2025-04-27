@@ -1,19 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Share App</title>
+    <title>File Sharing App</title>
 </head>
 <body>
-    <h1>Upload a file</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
+    <h1>Upload a File</h1>
+    <form method="post" enctype="multipart/form-data">
         <input type="file" name="file">
-        <button type="submit">Upload</button>
+        <input type="submit" value="Upload">
     </form>
-    {% if filename %}
-    <h2>File uploaded successfully!</h2>
-    <p>Click to download your file: <a href="https://{{ bucket_name }}.s3.amazonaws.com/{{ filename }}" target="_blank">{{ filename }}</a></p>
-    {% endif %}
 </body>
 </html>
+
