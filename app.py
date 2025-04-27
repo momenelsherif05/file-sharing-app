@@ -46,7 +46,8 @@ def upload_file():
     return render_template('upload.html', download_url=download_url)  # Render the page
 
 # Run the Flask app
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=80)
+
 
 
