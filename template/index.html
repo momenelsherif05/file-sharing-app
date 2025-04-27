@@ -1,14 +1,21 @@
 <!doctype html>
 <html>
 <head>
-    <title>File Sharing App</title>
+    <title>Upload File</title>
 </head>
 <body>
-    <h1>Upload a File</h1>
+    <h1>Upload a file</h1>
+    
+    <!-- File Upload Form -->
     <form method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
+        <input type="file" name="file" required>
         <input type="submit" value="Upload">
     </form>
+
+    <!-- Display the download link after successful upload -->
+    {% if download_url %}
+        <p>File uploaded successfully! 🎉</p>
+        <a href="{{ download_url }}" target="_blank">Download your file</a>
+    {% endif %}
 </body>
 </html>
-
