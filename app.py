@@ -3,40 +3,50 @@ import boto3
 import os
 from werkzeug.utils import secure_filename
 
-# Initialize the app
+# Flask app setup
 app = Flask(__name__)
 
-# S3 Configuration
-S3_BUCKET = 'file-share-teamx-2025'  # <-- Replace with your real bucket name
-S3_REGION = 'eu-north-1'     # <-- Example: us-east-1
+# AWS S3 configuration
+S3_BUCKET = 'file-share-teamx-2025'  # Replace with your S3 bucket name
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # Allowed file types
+s3 = boto3.client('s3')  # S3 client setup
 
-s3 = boto3.client('s3', region_name=S3_REGION)
-
-# Allowed file extensions
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
+# Function to check if file is allowed
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Route for uploading files
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    download_url = None  # Variable to store the generated download link
     if request.method == 'POST':
+        # Check if the 'file' is in the request
         if 'file' not in request.files:
-            return "No file part"
-
+            return 'No file part'
+        
         file = request.files['file']
-
+        
+        # If the user didn't select a file
         if file.filename == '':
-            return "No selected file"
+            return 'No selected file'
 
+        # Check if the file is allowed
         if file and allowed_file(file.filename):
+            # Secure the filename before uploading
             filename = secure_filename(file.filename)
+            
+            # Upload the file to S3
             s3.upload_fileobj(file, S3_BUCKET, filename)
-            file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{filename}"
-            return f"File uploaded successfully! <a href='{file_url}'>Download here</a>"
 
-    return render_template('upload.html')
+            # Generate the download URL for the file
+            download_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{filename}"
 
+            return render_template('upload.html', download_url=download_url)  # Show the download link
+
+    return render_template('upload.html', download_url=download_url)  # Render the page
+
+# Run the Flask app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
+
 
