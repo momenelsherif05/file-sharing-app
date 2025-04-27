@@ -1,41 +1,42 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for
 import boto3
 import os
 from werkzeug.utils import secure_filename
 
+# Initialize the app
 app = Flask(__name__)
 
-# Configure S3
-s3_client = boto3.client('s3')
-BUCKET_NAME = 'file-share-teamx-2025'
+# S3 Configuration
+S3_BUCKET = 'file-share-teamx-2025'  # <-- Replace with your real bucket name
+S3_REGION = 'eu-north-1'     # <-- Example: us-east-1
 
-# File upload folder and allowed file extensions
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'txt'}
+s3 = boto3.client('s3', region_name=S3_REGION)
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Allowed file extensions
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
-# Check if file type is allowed
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Home route to upload files
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-# Route to handle file upload
-@app.route('/upload', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    if 'file' not in request.files:
-        return redirect(request.url)
-    file = request.files['file']
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        # Save file to S3
-        s3_client.upload_fileobj(file, BUCKET_NAME, filename)
-        return render_template('index.html', filename=filename)
-    return redirect(url_for('index'))
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return "No file part"
+
+        file = request.files['file']
+
+        if file.filename == '':
+            return "No selected file"
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            s3.upload_fileobj(file, S3_BUCKET, filename)
+            file_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{filename}"
+            return f"File uploaded successfully! <a href='{file_url}'>Download here</a>"
+
+    return render_template('upload.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(host='0.0.0.0', port=80, debug=True)
+
