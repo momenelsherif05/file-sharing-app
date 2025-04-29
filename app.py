@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 # AWS S3 configuration
-S3_BUCKET = 'file-share-teamx-2025'  # Replace with your S3 bucket name
+S3_BUCKET = 'projectcloudbucket2025'  # Replace with your S3 bucket name
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # Allowed file types
 s3 = boto3.client('s3')  # S3 client setup
 
